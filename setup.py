@@ -13,7 +13,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 
 setup(
-    name="PACKAGE_NAME",
+    name="mario-gpt",
     version="0.1.0",
     url="https://github.com/kragniz/cookiecutter-pypackage-minimal",
     license='MIT',
@@ -21,7 +21,7 @@ setup(
     author="Shyam Sudhakaran",
     author_email="shyamsnair@protonmail.com",
 
-    description="DUMB",
+    description="Generating Mario Levels with GPT2. Code for the paper: 'MarioGPT: Open-Ended Text2Level Generation through Large Language Models', https://arxiv.org/abs/2302.05981",
 
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -29,6 +29,10 @@ setup(
     packages=find_packages(exclude=('tests',)),
 
     install_requires=[
+        'torch',
+        'transformers',
+        'scipy',
+        'tqdm'
     ],
 
     classifiers=[
