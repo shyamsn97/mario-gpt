@@ -3,7 +3,7 @@
 # MarioGPT: Open-Ended Text2Level Generation through Large Language Models
 [![Paper](https://img.shields.io/badge/paper-arxiv.2302.05981-B31B1B.svg)](https://arxiv.org/abs/2302.05981)
 
-![alt text](static/generations.png)
+![alt text](static/prompt-samples.png)
 
 </div>
 
