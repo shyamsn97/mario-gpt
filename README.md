@@ -9,6 +9,14 @@
 
 ---
 
+How does it work?
+----
+
+![alt text](static/architecture.png)
+
+MarioGPT is a finetuned GPT2 model (specifically, [distilgpt2](https://huggingface.co/distilgpt2)), that is trained on a subset Super Mario Bros and Super Mario Bros: The Lost Levels levels, provided by [The Video Game Level Corpus](https://github.com/TheVGLC/TheVGLC). MarioGPT is able to generate levels, guided by a simple text prompt. This generation is not perfect, but we believe this is a great first step more controllable and diverse level / environment generation.
+
+
 Requirements
 ----
 - python3.8+
