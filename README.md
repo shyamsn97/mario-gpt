@@ -23,6 +23,12 @@ Requirements
 
 Installation
 ---------------
+from pypi
+```
+pip install mario-gpt
+```
+
+or from source
 ```
 git clone git@github.com:shyamsn97/mario-gpt.git
 python setup.py install
