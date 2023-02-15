@@ -32,7 +32,8 @@ setup(
         'torch',
         'transformers',
         'scipy',
-        'tqdm'
+        'tqdm',
+        'pillow',
     ],
 
     classifiers=[
