@@ -72,8 +72,10 @@ view_level(generated_level, mario_lm.tokenizer)
 Here's a list of some stuff that will be added to the codebase!
 
 - [x] Basic inference code
-- [ ] Training code from paper
+- [x] Add MarioBert Model
+- [ ] Inpainting functionality from paper
 - [ ] Open-ended level generation code
+- [ ] Training code from paper
 - [ ] Different generation methods (eg. constrained beam search, etc.)
 
 

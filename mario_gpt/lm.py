@@ -1,9 +1,13 @@
-from typing import List, Optional
+from __future__ import annotations
+
+import abc
+from typing import List, Optional, Union
 
 import numpy as np
 import torch
 from tqdm import tqdm
 from transformers import (
+    AutoModelForMaskedLM,
     AutoModelWithLMHead,
     AutoTokenizer,
     GPT2Model,
@@ -11,6 +15,8 @@ from transformers import (
     LogitsProcessorList,
     PreTrainedModel,
     PreTrainedTokenizer,
+    RobertaModel,
+    RobertaTokenizer,
     TemperatureLogitsWarper,
     TopKLogitsWarper,
 )
@@ -18,15 +24,15 @@ from transformers import (
 from mario_gpt.prompter import Prompter
 
 PRETRAINED_MODEL_PATH = "shyamsn97/Mario-GPT2-700-context-length"
+PRETRAINED_MODEL_MASK_PATH = "shyamsn97/MarioBert-448-inpaint-context-length"
 
 
-class MarioLM:
+class BaseMarioLM(metaclass=abc.ABCMeta):
     def __init__(
         self,
         lm: Optional[PreTrainedModel] = None,
         tokenizer: Optional[PreTrainedTokenizer] = None,
         context_len: int = 700,
-        prompter: Optional[Prompter] = None,
     ):
         self.context_len = context_len
         self.lm = lm
@@ -38,10 +44,6 @@ class MarioLM:
         if tokenizer is None:
             self.tokenizer = self.load_pretrained_tokenizer()
 
-        self.prompter = prompter
-        if prompter is None:
-            self.prompter = Prompter(self.tokenizer)
-
     @property
     def device(self):
         return self.lm.device
@@ -49,6 +51,32 @@ class MarioLM:
     def to(self, device: torch.device):
         self.lm = self.lm.to(device)
         return self
+
+    @abc.abstractmethod
+    def load_pretrained_lm(self) -> PreTrainedModel:
+        """
+        Model to be used in level tile prediction
+        """
+
+    @abc.abstractmethod
+    def load_pretrained_tokenizer(self) -> PreTrainedTokenizer:
+        """
+        Tokenizer to be used to read / decode levels
+        """
+
+
+class MarioGPT(BaseMarioLM):
+    def __init__(
+        self,
+        lm: Optional[PreTrainedModel] = None,
+        tokenizer: Optional[PreTrainedTokenizer] = None,
+        context_len: int = 700,
+        prompter: Optional[Prompter] = None,
+    ):
+        super().__init__(lm, tokenizer, context_len)
+        self.prompter = prompter
+        if prompter is None:
+            self.prompter = Prompter(self.tokenizer)
 
     def load_pretrained_lm(self) -> GPT2Model:
         print(f"Using {PRETRAINED_MODEL_PATH} model")
@@ -148,3 +176,43 @@ class MarioLM:
                 bar.close()
         self.lm.train()
         return out
+
+
+class MarioBert(BaseMarioLM):
+    def __init__(
+        self,
+        lm: Optional[PreTrainedModel] = None,
+        tokenizer: Optional[PreTrainedTokenizer] = None,
+        context_len: int = 700,
+        mask_proportion: float = 0.15,
+    ):
+        super().__init__(lm, tokenizer, context_len)
+        self.mask_proportion = mask_proportion
+
+    def load_pretrained_lm(self) -> RobertaModel:
+        print(f"Using {PRETRAINED_MODEL_PATH} model")
+        return AutoModelForMaskedLM.from_pretrained(PRETRAINED_MODEL_MASK_PATH)
+
+    def load_pretrained_tokenizer(self) -> RobertaTokenizer:
+        print(f"Using {PRETRAINED_MODEL_PATH} tokenizer")
+        return AutoTokenizer.from_pretrained(PRETRAINED_MODEL_MASK_PATH)
+
+
+def MarioLM(
+    lm: Optional[PreTrainedModel] = None,
+    tokenizer: Optional[PreTrainedTokenizer] = None,
+    context_len: int = 700,
+    prompter: Optional[Prompter] = None,
+    mask_proportion: float = 0.15,
+    mask_model: bool = False,
+) -> Union[MarioGPT, MarioBert]:
+    if not mask_model:
+        return MarioGPT(
+            lm=lm, tokenizer=tokenizer, context_len=context_len, prompter=prompter
+        )
+    return MarioBert(
+        lm=lm,
+        tokenizer=tokenizer,
+        context_len=context_len,
+        mask_proportion=mask_proportion,
+    )
