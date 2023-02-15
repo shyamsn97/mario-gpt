@@ -43,7 +43,7 @@ Since our models are built off of the amazing [transformers](https://github.com/
 This code snippet is the minimal code you need to generate a mario level!
 
 ```python
-from mario_gpt.lm import MarioLM
+from mario_gpt import MarioLM
 from mario_gpt.utils import view_level, convert_level_to_png
 
 # pretrained_model = shyamsn97/Mario-GPT2-700-context-length

@@ -190,11 +190,11 @@ class MarioBert(BaseMarioLM):
         self.mask_proportion = mask_proportion
 
     def load_pretrained_lm(self) -> RobertaModel:
-        print(f"Using {PRETRAINED_MODEL_PATH} model")
+        print(f"Using {PRETRAINED_MODEL_MASK_PATH} model")
         return AutoModelForMaskedLM.from_pretrained(PRETRAINED_MODEL_MASK_PATH)
 
     def load_pretrained_tokenizer(self) -> RobertaTokenizer:
-        print(f"Using {PRETRAINED_MODEL_PATH} tokenizer")
+        print(f"Using {PRETRAINED_MODEL_MASK_PATH} tokenizer")
         return AutoTokenizer.from_pretrained(PRETRAINED_MODEL_MASK_PATH)
 
 
