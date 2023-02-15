@@ -1,7 +1,7 @@
 <div align="center">    
 
 # MarioGPT: Open-Ended Text2Level Generation through Large Language Models
-[![Paper](https://img.shields.io/badge/paper-arxiv.2302.05981-B31B1B.svg)](https://arxiv.org/abs/2302.05981)
+[![Paper](https://img.shields.io/badge/paper-arxiv.2302.05981-B31B1B.svg)](https://arxiv.org/abs/2302.05981) <a href="https://huggingface.co/spaces/multimodalart/mariogpt"><img src="https://img.shields.io/badge/%20HuggingFace%20-Demo-blue.svg" alt="HuggingFace Spaces"></a>
 
 ![alt text](static/prompt-samples.png)
 
