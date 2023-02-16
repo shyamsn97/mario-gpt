@@ -133,7 +133,11 @@ class MarioGPT(BaseMarioLM):
         self.lm.eval()
         with torch.no_grad():
             if seed is None:
-                seed = self.tokenizer("X", return_tensors="pt").input_ids.view(1, 1)
+                seed = (
+                    self.tokenizer("X", return_tensors="pt")
+                    .input_ids.view(1, 1)
+                    .repeat(len(prompts), 1)
+                )
             out = seed.to(self.device)
             if encoder_hidden_states is None:
                 if prompts is not None:
