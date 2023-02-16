@@ -43,7 +43,7 @@ Since our models are built off of the amazing [transformers](https://github.com/
 This code snippet is the minimal code you need to generate a mario level!
 
 ```python
-from mario_gpt.lm import MarioLM
+from mario_gpt import MarioLM
 from mario_gpt.utils import view_level, convert_level_to_png
 
 # pretrained_model = shyamsn97/Mario-GPT2-700-context-length
@@ -72,8 +72,10 @@ view_level(generated_level, mario_lm.tokenizer)
 Here's a list of some stuff that will be added to the codebase!
 
 - [x] Basic inference code
-- [ ] Training code from paper
+- [x] Add MarioBert Model
+- [ ] Inpainting functionality from paper
 - [ ] Open-ended level generation code
+- [ ] Training code from paper
 - [ ] Different generation methods (eg. constrained beam search, etc.)
 
 
