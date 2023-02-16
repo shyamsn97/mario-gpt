@@ -39,6 +39,7 @@ test.json
 venv
 .idea
 *.vscode/
+.DS_Store
 
 #notebooks
 */**/.ipynb_checkpoints/*
