@@ -27,6 +27,13 @@ PRETRAINED_MODEL_PATH = "shyamsn97/Mario-GPT2-700-context-length"
 PRETRAINED_MODEL_MASK_PATH = "shyamsn97/MarioBert-448-inpaint-context-length"
 
 
+def trim_level(level):
+    mod = level.shape[-1] % 14
+    if mod > 0:
+        return level[:, :-mod]
+    return level
+
+
 class BaseMarioLM(metaclass=abc.ABCMeta):
     def __init__(
         self,
@@ -178,6 +185,7 @@ class MarioGPT(BaseMarioLM):
                         )
             if use_tqdm:
                 bar.close()
+        out = trim_level(out)
         self.lm.train()
         return out
 

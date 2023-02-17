@@ -52,10 +52,10 @@ mario_lm = MarioLM()
 
 prompts = ["many pipes, many enemies, some blocks, high elevation"]
 
-# generate level of size 700
+# generate level of size 700, pump temperature up to ~2.4 for more stochastic but playable levels
 generated_level = mario_lm.sample(
     prompts=prompts,
-    num_steps=699,
+    num_steps=700,
     temperature=2.0,
     use_tqdm=True
 )
