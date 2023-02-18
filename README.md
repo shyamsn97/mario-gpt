@@ -4,6 +4,7 @@
 [![Paper](https://img.shields.io/badge/paper-arxiv.2302.05981-B31B1B.svg)](https://arxiv.org/abs/2302.05981) 
 [![PyPi version](https://badgen.net/pypi/v/mario-gpt/)](https://pypi.org/project/mario-gpt)
 <a href="https://huggingface.co/spaces/multimodalart/mariogpt"><img src="https://img.shields.io/badge/%20HuggingFace%20-Demo-blue.svg" alt="HuggingFace Spaces"></a>
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/16KR9idJUim6RAiyPASoQAaC768AvOGxP?usp=sharing)
 
 [Playing Generated Level](#interacting-with-levels)            |  Generated Level
 :-------------------------:|:-------------------------:
