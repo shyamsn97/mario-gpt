@@ -1,8 +1,19 @@
-from typing import Union
+import os
+from typing import List, Union
 
 import numpy as np
 import torch
 from PIL import Image
+
+pt = os.path.dirname(os.path.realpath(__file__))
+TILE_DIR = os.path.join(pt, "data", "tiles")
+
+
+def trim_level(level):
+    mod = level.shape[-1] % 14
+    if mod > 0:
+        return level[:, :-mod]
+    return level
 
 
 def characterize(str_lists):
@@ -13,7 +24,9 @@ def join_list_of_list(str_lists):
     return ["".join(s) for s in str_lists]
 
 
-def view_level(level_tokens, tokenizer):
+def view_level(level_tokens, tokenizer, flatten=False):
+    if flatten:
+        return tokenizer.batch_decode(level_tokens.detach().cpu().squeeze())
     str_list = [
         s.replace("<mask>", "Y")
         for s in tokenizer.batch_decode(level_tokens.detach().cpu().view(-1, 14))
@@ -51,10 +64,12 @@ def char_array_to_image(array, chars2pngs):
 
 
 def convert_level_to_png(
-    level: Union[str, torch.Tensor], tiles_dir: str, tokenizer=None
+    level: Union[str, torch.Tensor], tiles_dir: str = None, tokenizer=None
 ):
     if isinstance(level, torch.Tensor):
         level = view_level(level, tokenizer)
+    if tiles_dir is None:
+        tiles_dir = TILE_DIR
     chars2pngs = {
         "-": Image.open(f"{tiles_dir}/smb-background.png"),
         "X": Image.open(f"{tiles_dir}/smb-unpassable.png"),
@@ -77,6 +92,21 @@ def convert_level_to_png(
     levels = [list(s) for s in level]
     arr = np.array(levels)
     return char_array_to_image(arr, chars2pngs), arr, level
+
+
+def save_level(level: List[str], filename: str):
+    concatenated = "\n".join(level)
+    with open(filename, "w") as f:
+        f.write(concatenated)
+    return filename
+
+
+def load_level(filename: str) -> List[str]:
+    with open(filename, "r") as file:
+        level_string = file.read()
+    lines = level_string.split("\n")
+    lines = [line.strip() for line in lines]
+    return lines
 
 
 TOKENS = [

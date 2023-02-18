@@ -1,0 +1,2 @@
+recursive-include mario_gpt/data/tiles *
+include mario_gpt/simulator/Mario.jar
