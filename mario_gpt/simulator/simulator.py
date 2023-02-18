@@ -34,23 +34,27 @@ class Simulator:
         self.astar_jar_path = astar_jar_path
 
     def interactive(self):
-        with tempfile.NamedTemporaryFile(suffix=".txt", delete=True) as t:
-            save_level(self.level, t.name)
-            print(f"Playing level interactively -- {t.name}!")
-            _ = subprocess.run(
-                ["java", "-jar", self.interactive_jar_path, t.name, IMAGE_PATH],
-                stdout=subprocess.PIPE,
-            )
+        t = tempfile.NamedTemporaryFile(suffix=".txt", delete=False)
+        save_level(self.level, t.name)
+        print(f"Playing level interactively -- {t.name}!")
+        _ = subprocess.run(
+            ["java", "-jar", self.interactive_jar_path, t.name, IMAGE_PATH],
+            stdout=subprocess.PIPE,
+        )
+        t.close()
+        os.unlink(t.name)
 
     def astar(self, render: bool = True):
-        with tempfile.NamedTemporaryFile(suffix=".txt", delete=True) as t:
-            save_level(self.level, t.name)
-            print(f"Running Astar agent on level! -- {t.name}")
-            render_str = "human" if render else "norender"
-            _ = subprocess.run(
-                ["java", "-jar", self.astar_jar_path, t.name, render_str, IMAGE_PATH],
-                stdout=subprocess.PIPE,
-            )
+        t = tempfile.NamedTemporaryFile(suffix=".txt", delete=False)
+        save_level(self.level, t.name)
+        print(f"Running Astar agent on level! -- {t.name}")
+        render_str = "human" if render else "norender"
+        _ = subprocess.run(
+            ["java", "-jar", self.astar_jar_path, t.name, render_str, IMAGE_PATH],
+            stdout=subprocess.PIPE,
+        )
+        t.close()
+        os.unlink(t.name)
 
     def __call__(self, simulate_mode: str = "interactive", render: bool = True):
         if simulate_mode == "interactive":
