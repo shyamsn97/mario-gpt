@@ -116,6 +116,10 @@ class SampleOutput:
         simulator = Simulator(level=self.level)
         simulator.interactive()
 
+    def run_astar(self, render=True):
+        simulator = Simulator(level=self.level)
+        simulator.astar(render)
+
 
 class GPTSampler:
     def __init__(

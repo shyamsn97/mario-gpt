@@ -64,7 +64,7 @@ def char_array_to_image(array, chars2pngs):
 
 
 def convert_level_to_png(
-    level: Union[str, torch.Tensor], tiles_dir: str = None, tokenizer=None
+    level: Union[str, torch.Tensor], tokenizer=None, tiles_dir: str = None
 ):
     if isinstance(level, torch.Tensor):
         level = view_level(level, tokenizer)
