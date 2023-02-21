@@ -91,6 +91,15 @@ generated_level.play()
 # run Astar agent
 generated_level.run_astar()
 
+# Continue generation
+generated_level_continued = mario_lm.sample(
+    seed=generated_level,
+    prompts=prompts,
+    num_steps=1400,
+    temperature=2.0,
+    use_tqdm=True
+)
+
 # load from text file
 loaded_level = SampleOutput.load("generated_level.txt")
 

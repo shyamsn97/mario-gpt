@@ -174,7 +174,7 @@ class GPTSampler:
 
     def sample(
         self,
-        seed: Optional[torch.Tensor] = None,
+        seed: Union[Optional[torch.Tensor], Optional[SampleOutput]] = None,
         prompts: Optional[List[str]] = None,
         num_steps: int = 1,
         encoder_hidden_states: torch.Tensor = None,
@@ -184,12 +184,18 @@ class GPTSampler:
         self.mario_lm.lm.eval()
         with torch.no_grad():
             if seed is None:
-                seed = (
-                    self.mario_lm.tokenizer("X", return_tensors="pt")
-                    .input_ids.view(1, 1)
-                    .repeat(len(prompts), 1)
+                seed = self.mario_lm.generate_seed(1, batch_size=len(prompts)).to(
+                    self.device
                 )
-            out_tensor = seed.to(self.device)
+                out_tensor = seed.to(self.device)
+            elif isinstance(seed, SampleOutput):
+                out_tensor = seed.level_tensor.to(self.device).squeeze()
+            else:
+                out_tensor = seed.to(self.device).squeeze()
+            if len(out_tensor.shape) < 2:
+                # if we pass in a single seed vector, then we repeat for each prompt
+                # Otherwise, we treat inputs as separate seed-prompt pairs
+                out_tensor = out_tensor.view(1, -1).repeat(len(prompts), 1)
             if encoder_hidden_states is None:
                 if prompts is not None:
                     encoder_hidden_states = torch.stack(
@@ -208,7 +214,9 @@ class GPTSampler:
             encoder_hidden_states = encoder_hidden_states.to(
                 self.device
             )  # b x 1 x hidden_dim
-            encoder_hidden_states = encoder_hidden_states.view(seed.shape[0], 1, -1)
+            encoder_hidden_states = encoder_hidden_states.view(
+                out_tensor.shape[0], 1, -1
+            )
             if not self.use_tqdm:
                 bar = np.arange(num_steps)
             else:

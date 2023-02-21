@@ -32,6 +32,12 @@ class MarioGPT(BaseMarioLM):
         if prompter is None:
             self.prompter = Prompter(self.tokenizer)
 
+    def generate_seed(self, length: int, batch_size: Optional[int] = None):
+        seed = self.tokenizer("X", return_tensors="pt").input_ids.squeeze()
+        if batch_size is None:
+            return seed.repeat(length)
+        return seed.view(1, 1).repeat(batch_size, length)
+
     def load_pretrained_lm(self) -> GPT2Model:
         print(f"Using {PRETRAINED_MODEL_PATH} model")
         return AutoModelWithLMHead.from_pretrained(PRETRAINED_MODEL_PATH)
