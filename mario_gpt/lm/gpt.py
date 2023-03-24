@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import List, Optional
 
 import torch
@@ -37,6 +38,9 @@ class MarioGPT(BaseMarioLM):
         if batch_size is None:
             return seed.repeat(length)
         return seed.view(1, 1).repeat(batch_size, length)
+
+    def save_model(self, checkpoint_path: str, it: int):
+        self.lm.save_pretrained(os.path.join(checkpoint_path, f"iteration_{it}"))
 
     def load_pretrained_lm(self) -> GPT2Model:
         print(f"Using {PRETRAINED_MODEL_PATH} model")
