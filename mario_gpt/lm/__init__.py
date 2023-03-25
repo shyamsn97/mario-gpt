@@ -16,16 +16,25 @@ def MarioLM(
     prompter: Optional[Prompter] = None,
     mask_proportion: float = 0.15,
     mask_model: bool = False,
+    lm_path: Optional[str] = None,
+    tokenizer_path: Optional[str] = None,
 ) -> Union[MarioGPT, MarioBert]:
     if not mask_model:
         return MarioGPT(
-            lm=lm, tokenizer=tokenizer, context_len=context_len, prompter=prompter
+            lm=lm,
+            tokenizer=tokenizer,
+            context_len=context_len,
+            prompter=prompter,
+            lm_path=lm_path,
+            tokenizer_path=tokenizer_path,
         )
     return MarioBert(
         lm=lm,
         tokenizer=tokenizer,
         context_len=context_len,
         mask_proportion=mask_proportion,
+        lm_path=lm_path,
+        tokenizer_path=tokenizer_path,
     )
 
 
