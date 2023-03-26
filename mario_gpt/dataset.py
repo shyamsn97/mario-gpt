@@ -65,7 +65,7 @@ class MarioDataset(Dataset):
 
         self.tokenizer = tokenizer
         if getattr(tokenizer, "train_new_from_iterator", None) is not None:
-            self.tokenizer = tokenizer.train_new_from_iterator(
+            self.tokenizer = self.tokenizer.train_new_from_iterator(
                 get_training_corpus(), 52000
             )
         elif getattr(tokenizer, "train_from_iterator", None) is not None:
@@ -133,20 +133,3 @@ class MarioDataset(Dataset):
             join_list_of_list(flip_and_transpose(np.array(str_list), True))
         )
         return string
-
-    def generate_mask(self, mask_len: int, batch_size: int = 1):
-        mask_token = self.tokenizer("<mask>").input_ids[1]
-        ones = torch.ones((batch_size, mask_len))
-        return ones * mask_token
-
-    def apply_mask(self, level, masked_indices, mask=None):
-        if len(level.shape) == 1:
-            level = level.unsqueeze(0)
-        batch_size = level.shape[0]
-        mask_len = masked_indices.shape[-1]
-        if mask is None:
-            mask = self.generate_mask(mask_len, batch_size)
-        mask = mask.long().to(level.device)
-        masked_level = level * torch.ones_like(level).to(level.device)
-        masked_level[:, masked_indices] = mask
-        return masked_level

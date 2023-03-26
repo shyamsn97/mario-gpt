@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import torch
 from transformers import (
@@ -20,14 +20,32 @@ PRETRAINED_MODEL_PATH = "shyamsn97/Mario-GPT2-700-context-length"
 
 
 class MarioGPT(BaseMarioLM):
+    PRETRAINED_LM_PATH = PRETRAINED_MODEL_PATH
+    PRETRAINED_TOKENIZER_PATH = PRETRAINED_MODEL_PATH
+
+    BASE_LM_PATH = "distilgpt2"
+    BASE_TOKENIZER_PATH = "distilgpt2"
+
     def __init__(
         self,
         lm: Optional[PreTrainedModel] = None,
         tokenizer: Optional[PreTrainedTokenizer] = None,
         context_len: int = 700,
         prompter: Optional[Prompter] = None,
+        lm_path: Optional[str] = None,
+        tokenizer_path: Optional[str] = None,
+        lm_kwargs: Dict[str, Any] = {},
+        tokenizer_kwargs: Dict[str, Any] = {},
     ):
-        super().__init__(lm, tokenizer, context_len)
+        super().__init__(
+            lm,
+            tokenizer,
+            context_len,
+            lm_path,
+            tokenizer_path,
+            lm_kwargs,
+            tokenizer_kwargs,
+        )
         self.prompter = prompter
         if prompter is None:
             self.prompter = Prompter(self.tokenizer)
@@ -38,13 +56,15 @@ class MarioGPT(BaseMarioLM):
             return seed.repeat(length)
         return seed.view(1, 1).repeat(batch_size, length)
 
-    def load_pretrained_lm(self) -> GPT2Model:
-        print(f"Using {PRETRAINED_MODEL_PATH} model")
-        return AutoModelWithLMHead.from_pretrained(PRETRAINED_MODEL_PATH)
+    def load_pretrained_lm(self, path: str, lm_kwargs: Dict[str, Any]) -> GPT2Model:
+        return AutoModelWithLMHead.from_pretrained(
+            path, **{**lm_kwargs, "add_cross_attention": True}
+        )
 
-    def load_pretrained_tokenizer(self) -> GPT2Tokenizer:
-        print(f"Using {PRETRAINED_MODEL_PATH} tokenizer")
-        return AutoTokenizer.from_pretrained(PRETRAINED_MODEL_PATH)
+    def load_pretrained_tokenizer(
+        self, path: str, tokenizer_kwargs: Dict[str, Any]
+    ) -> GPT2Tokenizer:
+        return AutoTokenizer.from_pretrained(path, **tokenizer_kwargs)
 
     def sample(
         self,
