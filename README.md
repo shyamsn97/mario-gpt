@@ -108,6 +108,30 @@ loaded_level.play()
 ...
 ```
 
+Training
+-------------
+The code to train MarioGPT is pretty simple and straightforward, the training class is located [here](mario_gpt/trainer.py), with a small example [notebook](notebooks/Train.ipynb)
+
+```python
+import torch
+from mario_gpt import MarioDataset, MarioLM, TrainingConfig, MarioGPTTrainer
+
+# create basic gpt model
+BASE = "distilgpt2"
+mario_lm = MarioLM(lm_path=BASE, tokenizer_path=BASE)
+
+# create dataset
+dataset = MarioDataset(mario_lm.tokenizer)
+
+# create training config and trainer
+config = TrainingConfig(save_iteration=10)
+trainer = MarioGPTTrainer(mario_lm, dataset, config=config)
+
+# train for 100 iterations!
+trainer.train(100, batch_size=1)
+```
+
+
 ##### See [notebook](notebooks/Sampling.ipynb) for a more in depth tutorial to generate levels
 
 Interacting with Levels

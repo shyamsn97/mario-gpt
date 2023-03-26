@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from lib2to3.pgen2 import token
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
@@ -298,12 +297,12 @@ class BertSampler:
             clipped = input_ids.shape[-1] % 14
             input_ids = input_ids[:clipped]
 
-        portion = ((self.context_len - self.mask_portion) / 2)
+        portion = (self.context_len - self.mask_portion) / 2
 
         remainder = 0
         left = start_idx - portion
         if left < 0:
-            remainder = -1*left
+            remainder = -1 * left
 
         right = end_idx + portion + remainder
 
@@ -313,7 +312,7 @@ class BertSampler:
         self,
         seed: Union[torch.Tensor, SampleOutput],
         mask: torch.Tensor,
-        return_tensor: bool = False
+        return_tensor: bool = False,
     ):
         self.mario_lm.eval()
         mask_indices = mask.nonzero()
@@ -369,4 +368,3 @@ class BertSampler:
         if return_tensor:
             return sample_out, tokens
         return sample_out
-

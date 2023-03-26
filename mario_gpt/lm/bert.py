@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
-import torch
-import numpy as np
 
+import numpy as np
+import torch
 from transformers import (
     AutoModelForMaskedLM,
     AutoTokenizer,
@@ -52,9 +52,7 @@ class MarioBert(BaseMarioLM):
         batch_size = input_ids.shape[0]
         seq_len = input_ids.shape[-1]
         mask_portion = self.mask_portion
-        sampled_start_idx = [
-            i for i in range(seq_len - mask_portion) if i % 14 == 0
-        ]
+        sampled_start_idx = [i for i in range(seq_len - mask_portion) if i % 14 == 0]
         sampled_start_idx = np.random.choice(sampled_start_idx, batch_size)
         sampled_masks = []
         for idx in sampled_start_idx:
@@ -95,4 +93,3 @@ class MarioBert(BaseMarioLM):
         self, path: str, tokenizer_kwargs: Dict[str, Any]
     ) -> RobertaTokenizer:
         return AutoTokenizer.from_pretrained(path, **tokenizer_kwargs)
-
