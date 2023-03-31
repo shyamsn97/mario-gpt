@@ -19,6 +19,7 @@ STATISTICS = {
 }
 
 os.environ['TRANSFORMERS_CACHE'] = '/src/cache'
+FEATURE_EXTRACTION_MODEL = "facebook/bart-base"
 
 
 class Prompter:
