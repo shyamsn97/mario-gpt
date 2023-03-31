@@ -6,7 +6,6 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import torch
 from PIL.Image import Image
-from tqdm import tqdm
 from transformers import LogitsProcessorList, TemperatureLogitsWarper, TopKLogitsWarper
 
 from mario_gpt.lm.base import BaseMarioLM
@@ -128,14 +127,12 @@ class GPTSampler:
         temperature: float = 2.0,
         top_k: int = 16,
         context_len: int = 700,
-        use_tqdm: bool = False,
         use_argmax: bool = False,
     ):
         self.mario_lm = mario_lm
         self.temperature = temperature
         self.top_k = top_k
         self.context_len = context_len
-        self.use_tqdm = use_tqdm
         self.use_argmax = use_argmax
         self.logits_processor = LogitsProcessorList()
         self.logits_warper = LogitsProcessorList(
@@ -222,12 +219,8 @@ class GPTSampler:
                 out_tensor.shape[0], 1, -1
             )
 
-            if not self.use_tqdm:
-                bar = np.arange(num_steps)
-            else:
-                bar = tqdm(np.arange(num_steps))
             with torch.no_grad():
-                for i in bar:
+                for i in np.arange(num_steps):
                     inp = out_tensor * 1
                     if len(out_tensor.shape) > 0 and out_tensor.shape[-1] > context_len:
                         diff = inp.shape[-1] % 14
@@ -245,121 +238,5 @@ class GPTSampler:
                     if i % 14 == 0:
                         yield out_tensor[0][-15:-1]
 
-                    if self.use_tqdm:
-                        bar.set_description(
-                            f"shape: {inp.shape}, {out_tensor.shape} first: {inp[0][0]}, last: {out_tensor[0][-1]}"
-                        )
-            if self.use_tqdm:
-                bar.close()
-
     def __call__(self, *args, **kwargs):
         return self.sample(*args, **kwargs)
-
-
-class BertSampler:
-    def __init__(
-        self,
-        mario_lm: BaseMarioLM,
-        temperature: float = 2.0,
-        top_k: int = 16,
-        context_len: int = 448,
-        mask_proportion: float = 0.16,
-    ):
-        self.mario_lm = mario_lm
-        self.temperature = temperature
-        self.top_k = top_k
-        self.logits_processor = LogitsProcessorList()
-        self.logits_warper = LogitsProcessorList(
-            [
-                TopKLogitsWarper(top_k),  # number of characters
-                TemperatureLogitsWarper(temperature),
-            ]
-        )
-        self.context_len = context_len
-        self.mask_proportion = mask_proportion
-        self.mask_portion = int(self.context_len * self.mask_proportion)
-        self.mask_portion = self.mask_portion - self.mask_portion % 14 + 14
-
-    @property
-    def device(self) -> torch.device:
-        return self.mario_lm.device
-
-    def get_context(self, input_ids, mask_indices):
-        start_idx = mask_indices[0]
-        end_idx = mask_indices[-1]
-
-        if input_ids.shape[-1] <= self.context_len:
-            clipped = input_ids.shape[-1] % 14
-            input_ids = input_ids[:clipped]
-
-        portion = (self.context_len - self.mask_portion) / 2
-
-        remainder = 0
-        left = start_idx - portion
-        if left < 0:
-            remainder = -1 * left
-
-        right = end_idx + portion + remainder
-
-        return input_ids[left:right]
-
-    def sample(
-        self,
-        seed: Union[torch.Tensor, SampleOutput],
-        mask: torch.Tensor,
-        return_tensor: bool = False,
-    ):
-        self.mario_lm.eval()
-        mask_indices = mask.nonzero()
-        input_ids = seed
-        if isinstance(seed, SampleOutput):
-            input_ids = seed.level_tensor.to(self.device).squeeze()
-
-        input_id_list = []
-        for i in range(input_ids.shape[0]):
-            input_id = input_ids[i]
-            mask_index = mask_indices[mask_indices[:, 0] == i][:, -1]
-            input_id = self.get_context(input_id, mask_index)
-            input_id_list.append(input_id)
-        input_ids = torch.stack(input_ids, dim=0).to(self.device)
-
-        attention_mask = torch.ones_like(input_ids).to(seed.device)
-
-        if len(input_ids.shape) < 2:
-            # if we pass in a single seed vector, then we repeat for each prompt
-            # Otherwise, we treat inputs as separate seed-prompt pairs
-            input_ids = input_ids.view(1, -1)
-
-        out = self.mario_lm.lm(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            token_type_ids=None,
-        )
-        logits = out.logits.detach()
-        if len(logits.shape) == 2:
-            logits = logits.view(1, 1, -1)
-
-        if self.use_argmax:
-            tokens = logits.argmax(-1)
-        else:
-            tokens_scores = self.logits_processor(input_ids, tokens)
-            tokens_scores = self.logits_warper(input_ids, tokens_scores)
-            probs = torch.nn.functional.softmax(tokens_scores, dim=-1)
-            tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
-
-        out = input_ids.detach()
-
-        for i in range(input_ids.shape[0]):
-            mask_index = mask_indices[mask_indices[:, 0] == i][:, -1]
-            out[i, mask_index] = tokens[i, mask_index].detach()
-
-        sample_out = SampleOutput.from_level_predictions(
-            out,
-            tokens,
-            self.mario_lm.tokenizer,
-            self.mario_lm.prompter,
-        )
-        self.mario_lm.train()
-        if return_tensor:
-            return sample_out, tokens
-        return sample_out

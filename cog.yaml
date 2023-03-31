@@ -5,7 +5,6 @@ build:
 
   python_packages:
     - "Pillow==9.3.0"
-    - "tqdm==4.64.1"
     - "scipy==1.9.3"
     - "transformers==4.27.3"
     - "torch==2.0.0"

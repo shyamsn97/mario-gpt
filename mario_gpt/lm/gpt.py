@@ -75,10 +75,9 @@ class MarioGPT(BaseMarioLM):
         num_steps: int = 1,
         temperature: float = 2.0,
         encoder_hidden_states: torch.Tensor = None,
-        use_tqdm: bool = False,
         return_tensor: bool = False,
     ) -> SampleOutput:
-        sampler = GPTSampler(self, temperature, 16, self.context_len, use_tqdm)
+        sampler = GPTSampler(self, temperature, 16, self.context_len)
         return sampler(
             seed=seed,
             prompts=prompts,
