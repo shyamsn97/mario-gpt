@@ -16,7 +16,6 @@ from mario_gpt.lm.base import BaseMarioLM
 from mario_gpt.prompter import Prompter
 from mario_gpt.sampler import GPTSampler, SampleOutput
 
-os.environ['TRANSFORMERS_CACHE'] = '/src/cache'
 MODEL_ID = "shyamsn97/Mario-GPT2-700-context-length"
 
 

@@ -18,7 +18,6 @@ STATISTICS = {
     "block": np.array([50.0, 75.0, 176.0]),
 }
 
-os.environ['TRANSFORMERS_CACHE'] = '/src/cache'
 FEATURE_EXTRACTION_MODEL = "facebook/bart-base"
 
 

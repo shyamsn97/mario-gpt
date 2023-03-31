@@ -1,6 +1,10 @@
+import os
 import torch
 from mario_gpt import MarioLM
 from cog import BasePredictor, Input, ConcatenateIterator
+
+os.environ['TRANSFORMERS_CACHE'] = '/src/cache'
+os.environ['TRANSFORMERS_OFFLINE'] = '1'
 
 MODEL_ID = "shyamsn97/Mario-GPT2-700-context-length"
 MODEL_CACHE = "transformers-cache"
