@@ -20,7 +20,7 @@ class Simulator:
         astar_jar_path: Optional[str] = None,
     ):
         if level_filename is None and level is None:
-            raise ValueError("level_filename OR level_txt must be provided!")
+            raise ValueError("level_filename OR level must be provided!")
         elif level is None:
             level = load_level(level_filename)
         if interactive_jar_path is None:
