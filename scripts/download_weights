@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-from transformers import AutoModelWithLMHead, AutoTokenizer, AutoConfig
+from transformers import AutoModelWithLMHead, AutoTokenizer, BartModel
 from transformers.utils.hub import move_cache
 
 
 MODEL_CACHE = "/src/transformers-cache"
 MODEL_ID = "shyamsn97/Mario-GPT2-700-context-length"
 
-feature_extractor = AutoConfig.from_pretrained("facebook/bart-base", cache_dir=MODEL_CACHE)
+feature_extractor = BartModel.from_pretrained("facebook/bart-base", cache_dir=MODEL_CACHE)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, add_cross_attention=True, cache_dir=MODEL_CACHE)
 model = AutoModelWithLMHead.from_pretrained(MODEL_ID, add_cross_attention=True, cache_dir=MODEL_CACHE)
 
