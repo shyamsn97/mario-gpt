@@ -1,16 +1,9 @@
 #!/usr/bin/env python
 
-import os
-import shutil
-
 from transformers import AutoModelWithLMHead, AutoTokenizer, AutoConfig
 
-MODEL_CACHE = "transformers-cache"
+MODEL_CACHE = "/src/transformers-cache"
 MODEL_ID = "shyamsn97/Mario-GPT2-700-context-length"
-
-if os.path.exists(MODEL_CACHE):
-    shutil.rmtree(MODEL_CACHE)
-os.makedirs(MODEL_CACHE, exist_ok=True)
 
 feature_extractor = AutoConfig.from_pretrained("facebook/bart-base", cache_dir=MODEL_CACHE)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, add_cross_attention=True, cache_dir=MODEL_CACHE)
