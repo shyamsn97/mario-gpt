@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
 import os
-from transformers import AutoModelWithLMHead, AutoTokenizer, AutoModel
+import shutil
 
-os.environ['TRANSFORMERS_CACHE'] = '/src/cache'
+from transformers import AutoModelWithLMHead, AutoTokenizer, pipeline
+
+MODEL_CACHE = "transformers-cache"
 MODEL_ID = "shyamsn97/Mario-GPT2-700-context-length"
 
-print("Downloading model...")
-model = AutoModelWithLMHead.from_pretrained(
-    MODEL_ID, add_cross_attention=True,
-)
-print("Downloading tokenizer...")
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, add_cross_attention=True)
+if os.path.exists(MODEL_CACHE):
+    shutil.rmtree(MODEL_CACHE)
+os.makedirs(MODEL_CACHE, exist_ok=True)
 
-print("Downloading Bart...")
-feature_extractor = AutoModel.from_pretrained("facebook/bart-base")
+tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, add_cross_attention=True, cache_dir=MODEL_CACHE)
+feature_extractor = pipeline('feature-extraction', model="facebook/bart-base", cache_dir=MODEL_CACHE)
+model = AutoModelWithLMHead.from_pretrained(MODEL_ID, add_cross_attention=True, cache_dir=MODEL_CACHE)
