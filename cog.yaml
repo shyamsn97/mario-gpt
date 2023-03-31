@@ -1,0 +1,16 @@
+build:
+  gpu: true
+  cuda: "11.8"
+  python_version: "3.10"
+
+  python_packages:
+    - "Pillow==9.3.0"
+    - "tqdm==4.64.1"
+    - "scipy==1.9.3"
+    - "transformers==4.27.3"
+    - "torch==2.0.0"
+
+  run:
+    - "python setup.py install"
+
+predict: "predict.py:Predictor"

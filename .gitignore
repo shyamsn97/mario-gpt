@@ -52,3 +52,5 @@ venv
 checkpoints/*
 wandb/*
 mlruns/*
+
+.cog
