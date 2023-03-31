@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import sys
 from typing import Any, Dict, List, Optional
 
 import torch
@@ -16,12 +16,15 @@ from mario_gpt.lm.base import BaseMarioLM
 from mario_gpt.prompter import Prompter
 from mario_gpt.sampler import GPTSampler, SampleOutput
 
-PRETRAINED_MODEL_PATH = "shyamsn97/Mario-GPT2-700-context-length"
+# append project directory to path so predict.py can be imported
+sys.path.append('.')
+
+from predict import MODEL_CACHE, MODEL_ID
 
 
 class MarioGPT(BaseMarioLM):
-    PRETRAINED_LM_PATH = PRETRAINED_MODEL_PATH
-    PRETRAINED_TOKENIZER_PATH = PRETRAINED_MODEL_PATH
+    PRETRAINED_LM_PATH = MODEL_ID
+    PRETRAINED_TOKENIZER_PATH = MODEL_ID
 
     BASE_LM_PATH = "distilgpt2"
     BASE_TOKENIZER_PATH = "distilgpt2"
@@ -58,13 +61,15 @@ class MarioGPT(BaseMarioLM):
 
     def load_pretrained_lm(self, path: str, lm_kwargs: Dict[str, Any]) -> GPT2Model:
         return AutoModelWithLMHead.from_pretrained(
-            path, **{**lm_kwargs, "add_cross_attention": True}
+            path, **{**lm_kwargs, "add_cross_attention": True, "cache_dir": MODEL_CACHE,
+                     "local_files_only": True, }
         )
 
     def load_pretrained_tokenizer(
         self, path: str, tokenizer_kwargs: Dict[str, Any]
     ) -> GPT2Tokenizer:
-        return AutoTokenizer.from_pretrained(path, **tokenizer_kwargs)
+        return AutoTokenizer.from_pretrained(path, **{**tokenizer_kwargs, "add_cross_attention": True, "cache_dir": MODEL_CACHE,
+                     "local_files_only": True, })
 
     def sample(
         self,
