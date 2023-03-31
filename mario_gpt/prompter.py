@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import random
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -17,7 +18,7 @@ STATISTICS = {
     "block": np.array([50.0, 75.0, 176.0]),
 }
 
-FEATURE_EXTRACTION_MODEL = "facebook/bart-base"
+os.environ['TRANSFORMERS_CACHE'] = '/src/cache'
 
 
 class Prompter:

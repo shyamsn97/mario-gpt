@@ -5,19 +5,20 @@ import os
 import shutil
 import sys
 
-from transformers import AutoModelWithLMHead, AutoTokenizer
+from transformers import AutoModelWithLMHead, AutoTokenizer, pipeline
 
+os.environ['TRANSFORMERS_CACHE'] = '/src/cache'
 MODEL_ID = "shyamsn97/Mario-GPT2-700-context-length"
-MODEL_CACHE = "transformers-cache"
 
 # append project directory to path so predict.py can be imported
 sys.path.append('.')
 
-if os.path.exists(MODEL_CACHE):
-    shutil.rmtree(MODEL_CACHE)
-os.makedirs(MODEL_CACHE, exist_ok=True)
+if os.path.exists(os.environ['TRANSFORMERS_CACHE']):
+    shutil.rmtree(os.environ['TRANSFORMERS_CACHE'])
+os.makedirs(os.environ['TRANSFORMERS_CACHE'], exist_ok=True)
 
 model = AutoModelWithLMHead.from_pretrained(
-    MODEL_ID, add_cross_attention=True, cache_dir=MODEL_CACHE,
+    MODEL_ID, add_cross_attention=True, cache_dir=os.environ['TRANSFORMERS_CACHE'],
 )
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, add_cross_attention=True, cache_dir=MODEL_CACHE,)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, add_cross_attention=True, cache_dir=os.environ['TRANSFORMERS_CACHE'])
+feature_extractor = pipeline('feature-extraction', model="facebook/bart-base", tokenizer="distilgpt2", cache_dir=os.environ['TRANSFORMERS_CACHE'])
