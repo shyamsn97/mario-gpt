@@ -222,8 +222,6 @@ class GPTSampler:
                 out_tensor.shape[0], 1, -1
             )
 
-            yield out_tensor[0]
-
             if not self.use_tqdm:
                 bar = np.arange(num_steps)
             else:
@@ -253,7 +251,6 @@ class GPTSampler:
                         )
             if self.use_tqdm:
                 bar.close()
-
 
     def __call__(self, *args, **kwargs):
         return self.sample(*args, **kwargs)

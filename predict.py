@@ -12,7 +12,7 @@ class Predictor(BasePredictor):
     def predict(
         self,
         prompt: str = Input(description="Prompt for the Mario level"),
-        seed: Optional[str] = Input(description="Continue an existing level.", default=None),
+        seed: str = Input(description="Continue an existing level.", default=None),
         size: float = Input(
             description="Amount of columns the generated level will have", ge=0, le=1000, default=100
         ),
@@ -24,4 +24,7 @@ class Predictor(BasePredictor):
             num_steps=size * 14,
             temperature=2.0,
         ):
-            yield self.mario_lm.tokenizer.decode(line)
+            line = self.mario_lm.tokenizer.decode(line).replace("<mask>", "Y")
+
+            if len(line) > 1:
+                yield line

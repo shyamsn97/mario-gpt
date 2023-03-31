@@ -10,7 +10,4 @@ build:
     - "transformers==4.27.3"
     - "torch==2.0.0"
 
-  run:
-    - "python setup.py install"
-
 predict: "predict.py:Predictor"
