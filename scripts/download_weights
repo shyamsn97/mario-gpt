@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from predict import MODEL_CACHE, MODEL_ID
 import os
 import shutil
 import sys
