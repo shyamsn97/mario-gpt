@@ -1,5 +1,4 @@
 from __future__ import annotations
-import sys
 from typing import Any, Dict, List, Optional
 
 import torch
@@ -16,10 +15,8 @@ from mario_gpt.lm.base import BaseMarioLM
 from mario_gpt.prompter import Prompter
 from mario_gpt.sampler import GPTSampler, SampleOutput
 
-# append project directory to path so predict.py can be imported
-sys.path.append('.')
-
-from predict import MODEL_CACHE, MODEL_ID
+MODEL_ID = "shyamsn97/Mario-GPT2-700-context-length"
+MODEL_CACHE = "transformers-cache"
 
 
 class MarioGPT(BaseMarioLM):
@@ -69,7 +66,7 @@ class MarioGPT(BaseMarioLM):
         self, path: str, tokenizer_kwargs: Dict[str, Any]
     ) -> GPT2Tokenizer:
         return AutoTokenizer.from_pretrained(path, **{**tokenizer_kwargs, "add_cross_attention": True, "cache_dir": MODEL_CACHE,
-                     "local_files_only": True, })
+                                                      "local_files_only": True, })
 
     def sample(
         self,

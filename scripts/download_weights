@@ -7,6 +7,9 @@ import sys
 
 from transformers import AutoModelWithLMHead, AutoTokenizer
 
+MODEL_ID = "shyamsn97/Mario-GPT2-700-context-length"
+MODEL_CACHE = "transformers-cache"
+
 # append project directory to path so predict.py can be imported
 sys.path.append('.')
 
