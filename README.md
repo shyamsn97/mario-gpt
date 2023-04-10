@@ -172,15 +172,15 @@ Here's a list of some stuff that will be added to the codebase!
 - [x] Basic inference code
 - [x] Add MarioBert Model
 - [x] Add Interactive simulator
+- [x] Training code from paper
 - [ ] Inpainting functionality from paper
 - [ ] Open-ended level generation code
-- [ ] Training code from paper
 - [ ] Different generation methods (eg. constrained beam search, etc.)
 
 
 Authors
 -------
-Shyam Sudhakaran <shyamsnair@protonmail.com>, <https://github.com/shyamsn97>
+Shyam Sudhakaran <shyamsnair@protonmail.com>, <https://github.com/shyamsn97>, https://shyamsn97.github.io/
 
 Miguel González-Duque <migd@itu.dk>, <https://github.com/miguelgondu>
 
@@ -190,7 +190,7 @@ Matthias Freiberger <matfr@itu.dk>, <https://github.com/matfrei>
 
 Elias Najarro <enaj@itu.dk>, <https://github.com/enajx>
  
-Sebastian Risi <sebr@itu.dk>, <https://github.com/sebastianrisi>
+Sebastian Risi <sebr@itu.dk>, <https://github.com/sebastianrisi>, https://sebastianrisi.com/
 
 Citation
 ------
