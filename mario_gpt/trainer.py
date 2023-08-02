@@ -126,6 +126,7 @@ class MarioGPTTrainer:
         indices = list(
             torch.randint(low=0, high=len(train_dataset), size=(batch_size,)).long()
         )
+
         batch = train_dataset[indices]
         b_input_ids = batch[0].view(batch_size, -1).to(device)
         b_labels = batch[0].view(batch_size, -1).to(device)

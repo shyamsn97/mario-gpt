@@ -108,7 +108,10 @@ class MarioDataset(Dataset):
         return self.indices.shape[0]
 
     def __getitem__(self, idx):
-        indices = self.indices[idx]
+        if isinstance(idx, int):
+            indices = self.indices[idx]
+        else:
+            indices = torch.stack([self.indices[i] for i in idx])
         return self.input_ids[indices], self.attention_masks[indices]
 
     def generate_indices(self):

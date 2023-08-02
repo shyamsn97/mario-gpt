@@ -18,6 +18,7 @@ def MarioLM(
     mask_model: bool = False,
     lm_path: Optional[str] = None,
     tokenizer_path: Optional[str] = None,
+    **kwargs
 ) -> Union[MarioGPT, MarioBert]:
     if not mask_model:
         return MarioGPT(
@@ -27,6 +28,7 @@ def MarioLM(
             prompter=prompter,
             lm_path=lm_path,
             tokenizer_path=tokenizer_path,
+            **kwargs
         )
     return MarioBert(
         lm=lm,
@@ -35,6 +37,7 @@ def MarioLM(
         mask_proportion=mask_proportion,
         lm_path=lm_path,
         tokenizer_path=tokenizer_path,
+        **kwargs
     )
 
 

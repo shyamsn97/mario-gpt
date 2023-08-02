@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 import torch
 from transformers import (
+    AutoConfig,
     AutoModelWithLMHead,
     AutoTokenizer,
     GPT2Model,
@@ -57,6 +58,12 @@ class MarioGPT(BaseMarioLM):
         return seed.view(1, 1).repeat(batch_size, length)
 
     def load_pretrained_lm(self, path: str, lm_kwargs: Dict[str, Any]) -> GPT2Model:
+        if path == "random":
+            print("Initializing random weights...")
+            config = AutoConfig.from_pretrained(
+                self.BASE_LM_PATH, **{**lm_kwargs, "add_cross_attention": True}
+            )
+            return AutoModelWithLMHead.from_config(config)
         return AutoModelWithLMHead.from_pretrained(
             path, **{**lm_kwargs, "add_cross_attention": True}
         )
@@ -64,6 +71,10 @@ class MarioGPT(BaseMarioLM):
     def load_pretrained_tokenizer(
         self, path: str, tokenizer_kwargs: Dict[str, Any]
     ) -> GPT2Tokenizer:
+        if path == "random":
+            return AutoTokenizer.from_pretrained(
+                self.BASE_TOKENIZER_PATH, **tokenizer_kwargs
+            )
         return AutoTokenizer.from_pretrained(path, **tokenizer_kwargs)
 
     def sample(
