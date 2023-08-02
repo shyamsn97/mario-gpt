@@ -93,7 +93,7 @@ class MarioGPTTrainer:
             mixed_precision=config.mixed_precision,
             gradient_accumulation_steps=config.gradient_accumulation_steps,
             log_with="tensorboard",
-            logging_dir=os.path.join(config.output_dir, "logs"),
+            project_dir=config.output_dir,
         )
 
     def unwrap(self) -> BaseMarioLM:
@@ -180,7 +180,7 @@ class MarioGPTTrainer:
         self.accelerator.init_trackers("mario-gpt")
 
         checkpoint_path = self.config.output_dir
-        logdir = os.path.abspath(os.path.join(self.config.output_dir, "logs"))
+        logdir = os.path.abspath(self.accelerator.logging_dir)
 
         print(f"Training for {total_steps} Iterations and batch_size {batch_size}")
         if getattr(self.config, "pretty_print", None) is not None:
