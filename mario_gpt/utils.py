@@ -61,7 +61,7 @@ def char_array_to_image(array, chars2pngs, target_size=None):
             if char in chars2pngs:
                 value = chars2pngs[char]
             else:
-                print(f"REPLACING {value}", (col, row))
+                print(f"REPLACING {char}", (col, row))
             image.paste(value, (col * 16, row * 16))
     return image
 

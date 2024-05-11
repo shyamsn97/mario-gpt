@@ -1,7 +1,11 @@
 import os
 import subprocess
 import tempfile
-from typing import List, Optional
+from dataclasses import dataclass
+from typing import Any, List, Optional
+
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
 
 from mario_gpt.utils import load_level, save_level
 
@@ -9,6 +13,158 @@ pt = os.path.dirname(os.path.realpath(__file__))
 IMAGE_PATH = os.path.join(pt, "img/")
 INTERACTIVE_JAR_PATH = os.path.join(pt, "PlayLevel.jar")
 ASTAR_JAR_PATH = os.path.join(pt, "PlayAstar.jar")
+
+
+def load_images(directory):
+    images = []
+    names = os.listdir(directory)
+    for i in range(len(names)):
+        p = os.path.abspath(os.path.join(directory, f"img{i}.png"))
+        images.append(Image.open(p))
+    return images
+
+
+def read_observations(filename: str):
+    levels = []
+    with open(filename) as f:
+        for line in f:
+            levels.append(np.transpose(eval(line.replace("\n", ""))).astype(str))
+    return levels
+
+
+def read_actions(filename: str):
+    levels = []
+    with open(filename) as f:
+        for line in f:
+            levels.append(line.replace("\n", ""))
+    return levels
+
+
+tile_conversion = {
+    "0": " ",
+    "1": "E",
+    "17": "X",
+    "22": "S",
+    "24": "?",
+    "19": "B",
+    "30": "X",
+    "31": "o",
+    "34": "P",
+    "35": "P",
+    "36": "P",
+    "37": "P",
+    "59": "x",
+    "77": "M",
+    "55": "G",
+    "56": "G",
+}
+
+
+def get_asciis(levels):
+    import copy
+
+    np_levels = []
+    out = []
+    for idx, l in enumerate(levels):
+        lev = copy.deepcopy(l)
+        ascii_level = []
+        for i in range(lev.shape[0]):
+            for j in range(lev.shape[1]):
+                # if j <= (lev.shape[1] - 1) and i < (lev.shape[0] - 2):
+                #     lev[i][j] = "55"
+                if lev[i][j] not in tile_conversion:
+                    print(idx, "NOT IN", lev[i][j])
+                lev[i][j] = tile_conversion.get(lev[i][j])
+            ascii_level.append(" ".join(lev[i]))
+        np_levels.append(lev)
+        out.append("\n".join(ascii_level))
+    return out, np_levels
+
+
+def text_to_image(
+    ascii_art, font_size=10, text_color=(255, 255, 255), background_color=(0, 0, 0)
+):
+    # Split the ASCII art into lines
+    lines = ascii_art.split("\n")
+
+    # Determine image dimensions
+    width = max(len(line) for line in lines)
+    height = len(lines)
+
+    # Create a blank PIL image with transparent background
+    image = Image.new("RGBA", (width * font_size, height * font_size), background_color)
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.load_default()  # You can change the font if needed
+
+    # Draw the ASCII characters onto the image
+    y = 0
+    for line in lines:
+        x = 0
+        for char in line:
+            if char != " ":  # Only draw if the character is not a space
+                draw.text((x, y), char, font=font, fill=text_color)
+            x += font_size / 2
+        y += font_size
+
+    return image
+
+
+def make_video(imgs, output_path="output.mp4"):
+    import imageio
+    import numpy as np
+
+    # List of PIL images
+    # Output file path
+    # Create video writer object
+    writer = imageio.get_writer(output_path, fps=30)  # Adjust the fps as needed
+
+    # Iterate over images and add them to the video
+    for image in imgs:
+        # Convert PIL image to numpy array
+        image_np = np.array(image)
+
+        # Add image to video
+        writer.append_data(image_np)
+
+    # Close the writer
+    writer.close()
+
+    print("Video created successfully!")
+
+
+def concatenate_images_horizontally(image1, image2):
+    # Calculate the dimensions of the new image
+    width = image1.width + image2.width
+    height = max(image1.height, image2.height)
+
+    # Create a blank image with the calculated dimensions
+    concatenated_image = Image.new("RGB", (width, height))
+
+    # Paste the first image at the leftmost position
+    concatenated_image.paste(image1, (int(image2.width / 2), 10))
+
+    # Paste the second image to the right of the first image
+    concatenated_image.paste(image2, (image1.width, 0))
+
+    return concatenated_image
+
+
+@dataclass
+class SimulatorOutput:
+    images: List[Any]
+    observations: Any
+    np_obs: Any
+    actions: Any
+
+    def make_timelapse(self, filename="output.mp4"):
+        images = self.images
+        observations = self.observations
+        out = []
+        for i, o in zip(images, observations):
+            out.append(
+                concatenate_images_horizontally(text_to_image(o, font_size=16), i)
+            )
+        make_video(out, filename)
 
 
 class Simulator:
@@ -44,17 +200,43 @@ class Simulator:
         t.close()
         os.unlink(t.name)
 
-    def astar(self, render: bool = True):
-        t = tempfile.NamedTemporaryFile(suffix=".txt", delete=False)
-        save_level(self.level, t.name)
-        print(f"Running Astar agent on level! -- {t.name}")
-        render_str = "human" if render else "norender"
-        _ = subprocess.run(
-            ["java", "-jar", self.astar_jar_path, t.name, render_str, IMAGE_PATH],
-            stdout=subprocess.PIPE,
-        )
-        t.close()
-        os.unlink(t.name)
+    def astar(
+        self,
+        render: bool = True,
+        image_path: Optional[str] = None,
+    ):
+        if image_path is None:
+            image_path = IMAGE_PATH
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            output_image_path = os.path.join(tmpdirname, "images")
+            os.makedirs(output_image_path)
+
+            observations_path = os.path.join(tmpdirname, "observations.txt")
+            actions_path = os.path.join(tmpdirname, "actions.txt")
+
+            level_path = os.path.join(tmpdirname, "level.txt")
+            save_level(self.level, level_path)
+            print(f"Running Astar agent on level! -- {level_path}")
+            render_str = "human" if render else "norender"
+            subprocess_output = subprocess.run(
+                [
+                    "java",
+                    "-jar",
+                    self.astar_jar_path,
+                    level_path,
+                    render_str,
+                    image_path,
+                    tmpdirname,
+                ],
+                stdout=subprocess.PIPE,
+            )
+            _ = subprocess_output.stdout.splitlines()
+            images = load_images(output_image_path)
+            observations, np_obs = get_asciis(read_observations(observations_path))
+            actions = read_actions(actions_path)
+            return SimulatorOutput(
+                images=images, observations=observations, actions=actions, np_obs=np_obs
+            )
 
     def __call__(self, simulate_mode: str = "interactive", render: bool = True):
         if simulate_mode == "interactive":

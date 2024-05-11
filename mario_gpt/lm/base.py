@@ -7,7 +7,6 @@ from transformers import PreTrainedModel, PreTrainedTokenizer
 
 
 class BaseMarioLM(metaclass=abc.ABCMeta):
-
     PRETRAINED_LM_PATH = ""
     PRETRAINED_TOKENIZER_PATH = ""
 
