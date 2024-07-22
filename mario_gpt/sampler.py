@@ -9,7 +9,7 @@ from PIL.Image import Image
 from tqdm import tqdm
 from transformers import LogitsProcessorList, TemperatureLogitsWarper, TopKLogitsWarper
 
-from mario_gpt.lm.base import BaseMarioLM
+from mario_gpt.lm import BaseMarioLM
 from mario_gpt.prompter import Prompter
 from mario_gpt.simulator import Simulator
 from mario_gpt.utils import (
@@ -34,31 +34,28 @@ class SampleOutput:
     @classmethod
     def create(
         cls,
-        level_tensor: torch.Tensor,
-        sample_predictions_tensor: torch.Tensor,
-        tokenizer,
+        level_tensor: torch.Tensor = None,
+        sample_predictions_tensor: torch.Tensor = None,
+        tokenizer=None,
         prompter: Optional[Prompter] = None,
+        level=None,
     ) -> SampleOutput:
         # batch = 1
-        level = None
         img = None
 
         try:
-            level = view_level(level_tensor, tokenizer)
+            if level is None:
+                level = view_level(level_tensor, tokenizer)
             img = convert_level_to_png(level)[0]
         except Exception as e:
-            print(
-                f"Failed to generate string or image representation for full level! Got error {e}"
-            )
+            print(f"Got exception {e} when creating level")
             level = None
             img = None
         try:
             sample_predictions_str = view_level(sample_predictions_tensor, tokenizer)
             sample_predictions_img = convert_level_to_png(sample_predictions_str)[0]
         except Exception as e:
-            print(
-                f"Failed to generate string or image representation for sampled predictions! Got error {e}"
-            )
+            print(f"Got exception {e} when creating sample predictions")
             sample_predictions_str = None
             sample_predictions_img = None
 
@@ -91,7 +88,7 @@ class SampleOutput:
 
         if len(level_tensor.shape) == 1:
             return SampleOutput.create(
-                level_tensor, sample_predictions_tensor, tokenizer, prompter
+                level_tensor, sample_predictions_tensor, tokenizer, prompter=prompter
             )
 
         out = []
@@ -99,7 +96,7 @@ class SampleOutput:
             level_tensor, sample_predictions_tensor
         ):
             sample_output = SampleOutput.create(
-                _level_tensor, _sample_predictions_tensor, tokenizer, prompter
+                _level_tensor, _sample_predictions_tensor, tokenizer, prompter=prompter
             )
             out.append(sample_output)
         return out
@@ -108,9 +105,9 @@ class SampleOutput:
         save_level(self.level, filename)
 
     @classmethod
-    def load(cls, filename: str) -> SampleOutput:
+    def load(cls, filename: str, tokenizer=None) -> SampleOutput:
         level = load_level(filename)
-        return SampleOutput(level=level)
+        return SampleOutput.create(level=level, tokenizer=tokenizer)
 
     def play(self):
         simulator = Simulator(level=self.level)

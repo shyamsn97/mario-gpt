@@ -20,7 +20,9 @@ def load_images(directory):
     names = os.listdir(directory)
     for i in range(len(names)):
         p = os.path.abspath(os.path.join(directory, f"img{i}.png"))
-        images.append(Image.open(p))
+        im = Image.open(p)
+        images.append(im.copy())
+        im.close()
     return images
 
 
@@ -47,6 +49,7 @@ tile_conversion = {
     "22": "S",
     "24": "?",
     "19": "B",
+    "20": "B",
     "30": "X",
     "31": "o",
     "34": "P",
@@ -70,10 +73,8 @@ def get_asciis(levels):
         ascii_level = []
         for i in range(lev.shape[0]):
             for j in range(lev.shape[1]):
-                # if j <= (lev.shape[1] - 1) and i < (lev.shape[0] - 2):
-                #     lev[i][j] = "55"
                 if lev[i][j] not in tile_conversion:
-                    print(idx, "NOT IN", lev[i][j])
+                    print(idx, "NOT IN", tile_conversion, "IDX", idx)
                 lev[i][j] = tile_conversion.get(lev[i][j])
             ascii_level.append(" ".join(lev[i]))
         np_levels.append(lev)
@@ -153,8 +154,11 @@ def concatenate_images_horizontally(image1, image2):
 class SimulatorOutput:
     images: List[Any]
     observations: Any
+    one_hot_obs: Any
     np_obs: Any
     actions: Any
+    game_status: bool
+    console_out: str
 
     def make_timelapse(self, filename="output.mp4"):
         images = self.images
@@ -230,12 +234,21 @@ class Simulator:
                 ],
                 stdout=subprocess.PIPE,
             )
-            _ = subprocess_output.stdout.splitlines()
+            console_out = subprocess_output.stdout.splitlines()
             images = load_images(output_image_path)
-            observations, np_obs = get_asciis(read_observations(observations_path))
+            one_hot_obs = read_observations(observations_path)
+            observations, np_obs = get_asciis(one_hot_obs)
             actions = read_actions(actions_path)
+            console_out = [c.decode("utf-8") for c in console_out]
+            game_status = "WIN" in "\n".join(console_out).split("Game Status")[-1]
             return SimulatorOutput(
-                images=images, observations=observations, actions=actions, np_obs=np_obs
+                images=images,
+                observations=observations,
+                actions=actions,
+                np_obs=np_obs,
+                one_hot_obs=one_hot_obs,
+                game_status=game_status,
+                console_out=console_out,
             )
 
     def __call__(self, simulate_mode: str = "interactive", render: bool = True):
